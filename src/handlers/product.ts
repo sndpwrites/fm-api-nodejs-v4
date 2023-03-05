@@ -1,3 +1,4 @@
+import { nextTick } from "process"
 import prisma from "../db"
 
 
@@ -13,25 +14,34 @@ export const getProducts = async (req,res) => {
     res.json({data: user.products, errors: []})
 }
 
-export const getOneProduct = async (req, res) => {
-    const id = req.params.id
-    const product = await prisma.product.findFirst({
-        where: {
-            id: id,
-            belongsToId: req.user.id
-        }
-    })
-    res.json({data: product})
+export const getOneProduct = async (req, res,next) => {
+    try {
+        const id = req.params.id
+        const product = await prisma.product.findFirst({
+            where: {
+                id: id,
+                belongsToId: req.user.id
+            }
+        })
+        res.json({data: product})
+    } catch (e) {
+        next(e)
+    }
 }
 
-export const createProduct = async (req,res) => {
-    const product = await prisma.product.create({
-        data: {
-            name: req.body.name,
-            belongsToId: req.user.id
-        }
-    })
-    res.json({data:product})
+export const createProduct = async (req,res, next) => {
+    try {
+        const product = await prisma.product.create({
+            data: {
+                name: req.body.name,
+                belongsToId: req.user.id
+            }
+        })
+        res.json({data:product})
+
+    } catch (e) {
+        next(e)
+    }
 }
 
 export const updateProduct = async (req, res) => {
